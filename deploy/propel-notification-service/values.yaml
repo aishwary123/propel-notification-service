@@ -1,0 +1,27 @@
+namespace: propel
+env: SET_ME
+replicaCount: 3
+maxUnavailable: 35%
+maxSurge: 1
+image:
+  repository: <DOCKER_REPO_PATH>/propel-notification-service
+  tag: SET_ME
+  pullPolicy: Always
+nameOverride: ''
+fullnameOverride: ''
+buildArtifactoryCreds: SET_ME
+propelApiEndpoint: <PROPEL_SERVICE_ENDPOINT>
+databaseDetails:
+  databaseName: SET_ME
+  databaseURL: SET_ME
+  databasePort: SET_ME
+  username: SET_ME
+  password: SET_ME
+restTemplate:
+  connectionTimeoutInMillis: 60000
+  readTimeoutInMillis: 120000
+service:
+  type: NodePort
+  port: 80
+resources: {
+  }

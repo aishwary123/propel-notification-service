@@ -1,0 +1,73 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "propel-notification-service.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ include "propel-notification-service.name" . }}
+    chart: {{ include "propel-notification-service.chart" . }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.maxSurge }}
+      maxUnavailable: {{ .Values.maxUnavailable }}
+  selector:
+    matchLabels:
+      app: {{ include "propel-notification-service.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "propel-notification-service.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ include "propel-notification-service.fullname" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: databaseUrl
+          - name: DATABASE_PORT
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: databasePort
+          - name: DATABASE_NAME
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: databaseName
+          - name: DATABASE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: username
+          - name: DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: password
+          - name: PROPEL_API_ENDPOINT
+            value: {{ .Values.propelApiEndpoint | quote }}
+          - name: REST_TEMPLATE_CONNECTION_TIMEOUT
+            value: {{ .Values.restTemplate.connectionTimeoutInMillis | quote }}
+          - name: REST_TEMPLATE_READ_TIMEOUT
+            value: {{ .Values.restTemplate.readTimeoutInMillis | quote }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            {{ toYaml .Values.resources | indent 12 }}
+      imagePullSecrets:
+      - name: build-artifactory-creds
+   

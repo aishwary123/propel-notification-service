@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "propel-notification-service.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ include "propel-notification-service.name" . }}
+    chart: {{ include "propel-notification-service.chart" . }}
+    release: {{ .Release.Name }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ include "propel-notification-service.name" . }}
+    release: {{ .Release.Name }}
